@@ -19,12 +19,13 @@ func init() {
 
 func TestProducerCanPut(t *testing.T) {
 	hose.Start()
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 1500; i++ {
 		err := hose.Put([]byte(fmt.Sprintf("Message %d", i)))
 		if err != nil {
 			t.Error(err)
 			t.Fail()
 		}
 	}
+	hose.Stop()
 
 }
