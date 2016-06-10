@@ -112,7 +112,7 @@ func (p *Producer) flush(records []*firehose.Record, reason string) {
 		"package": "firehose",
 		"records": len(records),
 		"reason":  reason,
-	}).Info("flush")
+	}).Debug("flush")
 
 	params := &firehose.PutRecordBatchInput{
 		DeliveryStreamName: aws.String(p.FireHoseName),
