@@ -63,7 +63,7 @@ func (c *Config) defaults() {
 	})
 
 	if c.Client == nil {
-		c.Client = firehose.New(session.New(aws.NewConfig()))
+		c.Client = firehose.New(session.New(aws.NewConfig(), &aws.Config{Region: &c.Region}))
 	}
 
 	if c.BufferSize == 0 {
