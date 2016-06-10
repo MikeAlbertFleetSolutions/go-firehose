@@ -88,7 +88,6 @@ func (p *Producer) loop() {
 			}
 
 			if drain && len(p.records) == 0 {
-				p.Logger.Info("drained")
 				return
 			}
 		case <-tick.C:
