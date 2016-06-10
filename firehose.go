@@ -74,6 +74,11 @@ func (p *Producer) loop() {
 	tick := time.NewTicker(p.FlushInterval)
 	drain := false
 
+	defer func() {
+		if len(buf) > 0 {
+			p.flush(buf, "final")
+		}
+	}()
 	defer tick.Stop()
 	defer close(p.done)
 
