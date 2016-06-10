@@ -10,17 +10,14 @@ import (
 
 var hose *fh.Producer
 
-func init() {
+func TestProducerCanPut(t *testing.T) {
 	conf := fh.Config{
 		FireHoseName: "testStream",
 		Region:       "us-west-2",
 	}
 	hose = fh.New(conf)
-}
-
-func TestProducerCanPut(t *testing.T) {
 	hose.Start()
-	for i := 0; i < 1500; i++ {
+	for i := 0; i < 1525; i++ {
 		err := hose.Put([]byte(fmt.Sprintf("Message %d", i)))
 		if err != nil {
 			t.Error(err)
@@ -31,9 +28,14 @@ func TestProducerCanPut(t *testing.T) {
 }
 
 func TestProducerTicks(t *testing.T) {
+	conf := fh.Config{
+		FireHoseName: "testStream",
+		Region:       "us-west-2",
+	}
+	hose = fh.New(conf)
 	hose.Start()
 	for i := 0; i < 3; i++ {
-		time.Sleep(time.Second * 3)
+		time.Sleep(time.Second)
 		for i := 0; i < 300; i++ {
 			err := hose.Put([]byte(fmt.Sprintf("Message %d", i)))
 			if err != nil {
