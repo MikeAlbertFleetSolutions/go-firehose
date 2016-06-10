@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/apex/log"
+	"github.com/apex/log/handlers/cli"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/firehose"
@@ -36,20 +37,17 @@ type Config struct {
 	Backoff backoff.Backoff
 
 	// Logger: the logger used.
-	Logger log.Interface
+	Logger log.Logger
 
 	// Client is a firehose API instance
 	Client firehoseiface.FirehoseAPI
 }
 
 func (c *Config) defaults() {
-	if c.Logger == nil {
-		c.Logger = log.Log
-	}
 
-	c.Logger = c.Logger.WithFields(log.Fields{
-		"package": "kinesis",
-	})
+	if c.Logger.Handler == nil {
+		c.Logger.Handler = cli.Default
+	}
 
 	if c.Region == "" {
 		c.Logger.Fatal("Region is required")
@@ -58,9 +56,6 @@ func (c *Config) defaults() {
 	if c.FireHoseName == "" {
 		c.Logger.Fatal("StreamName required")
 	}
-	c.Logger = c.Logger.WithFields(log.Fields{
-		"stream": c.FireHoseName,
-	})
 
 	if c.Client == nil {
 		c.Client = firehose.New(session.New(aws.NewConfig(), &aws.Config{Region: &c.Region}))
