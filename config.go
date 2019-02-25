@@ -1,10 +1,9 @@
 package firehose
 
 import (
+	"log"
 	"time"
 
-	"github.com/apex/log"
-	"github.com/apex/log/handlers/cli"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/firehose"
@@ -36,25 +35,17 @@ type Config struct {
 	// Backoff: strategy to use for failures.
 	Backoff backoff.Backoff
 
-	// Logger: the logger used.
-	Logger log.Logger
-
 	// Client is a firehose API instance
 	Client firehoseiface.FirehoseAPI
 }
 
 func (c *Config) defaults() {
-
-	if c.Logger.Handler == nil {
-		c.Logger.Handler = cli.Default
-	}
-
 	if c.Region == "" {
-		c.Logger.Fatal("Region is required")
+		log.Fatalln("Region is required")
 	}
 
 	if c.FireHoseName == "" {
-		c.Logger.Fatal("StreamName required")
+		log.Fatalln("StreamName required")
 	}
 
 	if c.Client == nil {
@@ -66,7 +57,7 @@ func (c *Config) defaults() {
 	}
 
 	if c.BufferSize > maxBatchSize {
-		c.Logger.Fatal("BufferSize exceeds 500")
+		log.Fatalln("BufferSize exceeds 500")
 	}
 
 	if c.BacklogSize == 0 {

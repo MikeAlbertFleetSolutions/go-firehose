@@ -2,9 +2,9 @@ package firehose
 
 import (
 	"errors"
+	"log"
 	"time"
 
-	"github.com/apex/log"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/firehose"
 )
@@ -57,16 +57,12 @@ func (p *Producer) Start() {
 
 // Stop the producer. Flushes any in-flight data.
 func (p *Producer) Stop() {
-	p.Logger.WithField("backlog", len(p.records)).Info("stopping producer")
-
 	// drain
 	p.done <- struct{}{}
 	close(p.records)
 
 	// wait
 	<-p.done
-
-	p.Logger.Info("stopped producer")
 }
 
 func (p *Producer) loop() {
@@ -112,12 +108,6 @@ func (p *Producer) loop() {
 
 // flush records and retry failures if necessary.
 func (p *Producer) flush(records []*firehose.Record, reason string) {
-	p.Logger.WithFields(log.Fields{
-		"package": "firehose",
-		"records": len(records),
-		"reason":  reason,
-	}).Debug("flush")
-
 	params := &firehose.PutRecordBatchInput{
 		DeliveryStreamName: aws.String(p.FireHoseName),
 		Records:            records,
@@ -126,7 +116,7 @@ func (p *Producer) flush(records []*firehose.Record, reason string) {
 	out, err := p.Client.PutRecordBatch(params)
 
 	if err != nil {
-		p.Logger.WithError(err).Error("flush")
+		log.Printf("%+v", err)
 		p.backoff(len(records))
 		p.flush(records, "error")
 		return
@@ -144,11 +134,6 @@ func (p *Producer) flush(records []*firehose.Record, reason string) {
 // calculates backoff duration and pauses execution
 func (p *Producer) backoff(failed int) {
 	backoff := p.Backoff.Duration()
-
-	p.Logger.WithFields(log.Fields{
-		"failures": failed,
-		"backoff":  backoff,
-	}).Warn("put failures")
 
 	time.Sleep(backoff)
 }
